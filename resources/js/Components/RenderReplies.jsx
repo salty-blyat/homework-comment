@@ -4,19 +4,27 @@ import { Avatar, Button, Modal, message } from "antd";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-const RenderComments = ({
-    refetchComments,
-    success,
-    finished,
+const RenderReplies = ({
+    refetchComments, 
     comments = [],
-    product_id,
-    createComment,
+    product_id, 
 }) => {
     const [replyingTo, setReplyingTo] = useState(null);
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [commentToDelete, setCommentToDelete] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+
+    const {
+        triggerFetch: createComment,
+        responseData: success,
+        finished: finished,
+    } = useAxios({
+        endpoint: "/api/comment",
+        config: {},
+        method: "POST",
+    });
 
     const {
         triggerFetch: editComment,
@@ -85,7 +93,7 @@ const RenderComments = ({
         if (replyingTo) {
             formData.append("parent_id", replyingTo);
         }
-        createComment(formData);
+        createComment?.(formData);
         reset();
     };
 
@@ -110,20 +118,22 @@ const RenderComments = ({
             deleteComment?.(formData);
         }
     };
-    console.log(comments[0].name);
+    console.log(comments);
 
     return (
         <>
-            {comments?.length > 0 ? (
+            {/* {comments?.length > 0 ? (
                 comments?.map((comment) => (
                     <div key={comment?.id} className="mb-6">
                         <Comment
                             author={
-                                <div className="font-medium text-gray-800">
-                                    {comment?.name}
+                                <div className="flex justify-between w-full font-medium text-gray-800">
+                                    <span>{comment?.name}</span>
+                                    <span>{comment?.commented_at}</span>
                                 </div>
                             }
-                            avatar={<Avatar>{comment?.name?.toString()?.[0] || 'U'}</Avatar>}                            content={
+                            avatar={<Avatar>{comment?.name[0]}</Avatar>}
+                            content={
                                 editingCommentId === comment?.id ? (
                                     <form onSubmit={handleSubmit(onEdit)}>
                                         <input
@@ -192,18 +202,7 @@ const RenderComments = ({
                                 ),
                             ]}
                         />
-                        {comment?.replies?.length > 0 && (
-                            <div className="ml-8 mt-4 pl-4 border-l-2 border-gray-200">
-                                <RenderComments
-                                    success={success}
-                                    finished={finished}
-                                    refetchComments={refetchComments}
-                                    createComment={createComment}
-                                    product_id={product_id}
-                                    comments={comment?.replies}
-                                />
-                            </div>
-                        )}
+                        
                         {replyingTo === comment?.id && (
                             <div className="ml-8 pl-4 border-l-2 border-gray-200">
                                 <form onSubmit={handleSubmit(onSubmit)}>
@@ -236,7 +235,7 @@ const RenderComments = ({
                 ))
             ) : (
                 <p className="text-gray-500">No comments yet</p>
-            )}
+            )} */}
 
             <Modal
                 title="Are you sure you want to delete?"
@@ -255,4 +254,4 @@ const RenderComments = ({
     );
 };
 
-export default RenderComments;
+export default RenderReplies;
